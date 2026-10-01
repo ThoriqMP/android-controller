@@ -98,19 +98,40 @@ fi
 PIP_CMD="pip3"
 command -v pip3 &>/dev/null || PIP_CMD="pip"
 
-# Install wajib
-info "Menginstall google-generativeai (fallback API)..."
-$PIP_CMD install google-generativeai --quiet 2>/dev/null || warn "google-generativeai gagal, coba manual"
+# Upgrade pip dulu (penting di Termux)
+$PIP_CMD install --upgrade pip --quiet 2>/dev/null || true
 
-# Install Antigravity SDK (opsional, mungkin tidak tersedia di semua platform)
-info "Mencoba install google-antigravity SDK..."
-if $PIP_CMD install google-antigravity --quiet 2>/dev/null; then
-    ok "Antigravity SDK terinstall!"
+# ── CATATAN PENTING ──────────────────────────────────────────
+# Di Termux (Android ARM64):
+#   - GUNAKAN: google-generativeai  (✓ support ARM64)
+#   - JANGAN:  google-antigravity   (✗ butuh platform wheel, tidak ada untuk ARM)
+#   - JANGAN:  pip install agy      (✗ package salah, bukan Google Antigravity)
+#   - JANGAN:  pip install antigravity (✗ Easter egg Python, bukan AI agent)
+# ─────────────────────────────────────────────────────────────
+
+info "Menginstall google-generativeai (Gemini API untuk Termux)..."
+if $PIP_CMD install google-generativeai --quiet 2>/dev/null; then
+    ok "google-generativeai terinstall! (Mode: Gemini API)"
 else
-    warn "google-antigravity tidak tersedia. Akan menggunakan Gemini API langsung."
-    info "Install manual: pip install google-antigravity"
+    # Coba dengan --no-deps dulu jika gagal
+    warn "Coba install dengan opsi alternatif..."
+    $PIP_CMD install google-generativeai --no-deps --quiet 2>/dev/null || true
+    $PIP_CMD install google-auth httpx protobuf --quiet 2>/dev/null || true
+    ok "google-generativeai terinstall (minimal dependencies)"
 fi
+
+# Antigravity SDK hanya untuk desktop
+if ! $IS_TERMUX; then
+    info "Mencoba install google-antigravity SDK (desktop only)..."
+    if $PIP_CMD install google-antigravity --quiet 2>/dev/null; then
+        ok "Antigravity SDK terinstall! (Mode: Full Antigravity)"
+    else
+        warn "google-antigravity tidak tersedia. Akan menggunakan Gemini API."
+    fi
+fi
+
 ok "Python dependencies siap"
+
 
 # ── STEP 4: Konfigurasi direktori ─────────────────────────────
 CURRENT_STEP=$((CURRENT_STEP + 1))
