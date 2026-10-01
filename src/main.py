@@ -192,26 +192,43 @@ def cmd_status(args):
     pv = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
     checks.append(("Python", pv, True))
     
-    # Antigravity SDK
-    try:
-        import google.antigravity
-        checks.append(("Antigravity SDK", "Terinstall ✓", True))
-    except ImportError:
-        checks.append(("Antigravity SDK", "Tidak terinstall (pip install google-antigravity)", False))
+    # Status Antigravity lengkap via get_auth_status()
+    from agent import get_auth_status
+    auth = get_auth_status()
     
-    # Gemini API
-    try:
-        import google.generativeai
-        checks.append(("google-generativeai", "Terinstall ✓", True))
-    except ImportError:
-        checks.append(("google-generativeai", "Tidak terinstall", False))
+    checks.append((
+        "Antigravity SDK",
+        "Terinstall ✓" if auth["sdk_installed"] else "Tidak terinstall → pip install google-antigravity",
+        auth["sdk_installed"]
+    ))
+    checks.append((
+        "agy CLI login",
+        "Terautentikasi ✓ (Full Mode aktif!)" if auth["agy_authenticated"] else "Belum login → jalankan: agy",
+        auth["agy_authenticated"]
+    ))
+    checks.append((
+        "google-generativeai",
+        "Terinstall ✓" if auth["genai_installed"] else "Tidak terinstall → pip install google-generativeai",
+        auth["genai_installed"]
+    ))
+    checks.append((
+        "API Key (fallback)",
+        f"Tersedia ({auth['api_key'][:8]}...)" if auth["api_key"] else "Tidak ditemukan → actl config",
+        bool(auth["api_key"])
+    ))
     
-    # API Key
-    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-    if api_key:
-        checks.append(("API Key", f"Tersedia ({api_key[:8]}...)", True))
+    # Mode aktif
+    if auth["full_mode"]:
+        mode_str = "⚡ ANTIGRAVITY FULL (via agy)"
+        mode_ok  = True
+    elif auth["fallback_mode"]:
+        mode_str = "⭗ GEMINI FALLBACK (via API key)"
+        mode_ok  = True
     else:
-        checks.append(("API Key", "Tidak ditemukan (set GEMINI_API_KEY)", False))
+        mode_str = "✗ TIDAK ADA KONEKSI AI"
+        mode_ok  = False
+    checks.append(("Mode aktif", mode_str, mode_ok))
+
     
     # Docker
     import subprocess
