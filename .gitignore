@@ -1,0 +1,51 @@
+# Android Controller — Termux × Antigravity AI
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+
+# Config sensitif (API keys)
+config/settings.json
+.env
+*.env.local
+
+# Setup marker
+config/.setup_done
+
+# Server PID tracker
+~/.actl_servers.json
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Temporary
+*.tmp
+*.temp

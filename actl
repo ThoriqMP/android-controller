@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+"""
+actl - Android Controller CLI
+Termux × Antigravity AI Agent Integration
+"""
+
+import sys
+import os
+
+# Tambahkan src ke path
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
+
+from main import cli
+
+if __name__ == "__main__":
+    cli()
